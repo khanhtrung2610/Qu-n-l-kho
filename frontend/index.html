@@ -198,29 +198,15 @@
                         <option value="">-- Chọn kho --</option>
                       </select>
                     </div>
-                    <div class="col-md-2">
-                      <label class="form-label">Giá (VNĐ)</label>
-                      <input type="number" class="form-control" id="sup-add-price" placeholder="0" min="0" />
-                    </div>
-                    <div class="col-md-2">
-                      <label class="form-label">Giao hàng (ngày)</label>
-                      <input type="number" class="form-control" id="sup-add-delivery" placeholder="7" min="1" />
+                    <div class="col-md-3">
+                      <label class="form-label">Ngày giao hàng dự kiến</label>
+                      <input type="date" class="form-control" id="sup-add-delivery" />
                     </div>
                     <div class="col-md-1">
                       <label class="form-label d-block">&nbsp;</label>
                       <button type="button" class="btn btn-success w-100" id="sup-btn-add-product" title="Thêm">
                         <i class="bi bi-plus-lg"></i>
                       </button>
-                    </div>
-                  </div>
-                  <div class="row mt-2">
-                    <div class="col-md-3">
-                      <label class="form-label">Độ ưu tiên</label>
-                      <select class="form-select" id="sup-add-priority">
-                        <option value="low">Thấp</option>
-                        <option value="medium" selected>Trung bình</option>
-                        <option value="high">Cao</option>
-                      </select>
                     </div>
                   </div>
                 </div>
@@ -236,18 +222,15 @@
                     <table class="table table-hover mb-0">
                       <thead class="table-light">
                         <tr>
-                          <th style="width: 30%">Sản phẩm</th>
-                          <th style="width: 20%">Kho</th>
-                          <th style="width: 15%" class="text-end">Giá</th>
-                          <th style="width: 10%" class="text-center">Giao hàng</th>
-                          <th style="width: 10%" class="text-center">Ưu tiên</th>
-                          <th style="width: 10%" class="text-center">Trạng thái</th>
-                          <th style="width: 5%" class="text-center">Xóa</th>
+                          <th style="width: 40%">Sản phẩm</th>
+                          <th style="width: 30%">Kho</th>
+                          <th style="width: 20%" class="text-center">Ngày giao hàng</th>
+                          <th style="width: 10%" class="text-center">Xóa</th>
                         </tr>
                       </thead>
                       <tbody id="sup-products-list">
                         <tr>
-                          <td colspan="7" class="text-center text-muted py-4">
+                          <td colspan="4" class="text-center text-muted py-4">
                             <i class="bi bi-inbox fs-3"></i>
                             <p class="mb-0 mt-2">Chưa có sản phẩm nào. Vui lòng thêm sản phẩm ở trên.</p>
                           </td>
@@ -315,13 +298,6 @@
                     </select>
                     <small class="text-muted">Kho lưu trữ chính cho sản phẩm này</small>
                   </div>
-                  <div class="mb-3">
-                    <label class="form-label">Sản phẩm cha</label>
-                    <select class="form-select" id="prod-parent">
-                      <option value="">-- Không có --</option>
-                    </select>
-                    <small class="text-muted">Nếu đây là biến thể/phụ kiện của sản phẩm khác</small>
-                  </div>
                   <div class="mb-3"><label class="form-label">Trạng thái</label><select class="form-select" id="prod-status"><option value="active">Hoạt động</option><option value="inactive">Ngừng bán</option></select></div>
                 </div>
               </div>
@@ -353,29 +329,15 @@
                         <option value="">-- Chọn kho --</option>
                       </select>
                     </div>
-                    <div class="col-md-2">
-                      <label class="form-label">Giá (VNĐ)</label>
-                      <input type="number" class="form-control" id="prod-add-price" placeholder="0" min="0" />
-                    </div>
-                    <div class="col-md-2">
-                      <label class="form-label">Giao (ngày)</label>
-                      <input type="number" class="form-control" id="prod-add-delivery" placeholder="7" min="1" />
+                    <div class="col-md-3">
+                      <label class="form-label">Ngày giao hàng dự kiến</label>
+                      <input type="date" class="form-control" id="prod-add-delivery" />
                     </div>
                     <div class="col-md-1">
                       <label class="form-label d-block">&nbsp;</label>
                       <button type="button" class="btn btn-success w-100" id="prod-btn-add-supplier" title="Thêm">
                         <i class="bi bi-plus-lg"></i>
                       </button>
-                    </div>
-                  </div>
-                  <div class="row mt-2">
-                    <div class="col-md-3">
-                      <label class="form-label">Độ ưu tiên</label>
-                      <select class="form-select" id="prod-add-priority">
-                        <option value="low">Thấp</option>
-                        <option value="medium" selected>Trung bình</option>
-                        <option value="high">Cao</option>
-                      </select>
                     </div>
                   </div>
                 </div>
@@ -391,18 +353,15 @@
                     <table class="table table-hover mb-0">
                       <thead class="table-light">
                         <tr>
-                          <th style="width: 30%">Nhà cung cấp</th>
-                          <th style="width: 20%">Kho</th>
-                          <th style="width: 15%" class="text-end">Giá</th>
-                          <th style="width: 10%" class="text-center">Giao hàng</th>
-                          <th style="width: 10%" class="text-center">Ưu tiên</th>
-                          <th style="width: 10%" class="text-center">Trạng thái</th>
-                          <th style="width: 5%" class="text-center">Xóa</th>
+                          <th style="width: 40%">Nhà cung cấp</th>
+                          <th style="width: 30%">Kho</th>
+                          <th style="width: 20%" class="text-center">Ngày giao hàng</th>
+                          <th style="width: 10%" class="text-center">Xóa</th>
                         </tr>
                       </thead>
                       <tbody id="prod-suppliers-list">
                         <tr>
-                          <td colspan="7" class="text-center text-muted py-4">
+                          <td colspan="4" class="text-center text-muted py-4">
                             <i class="bi bi-inbox fs-3"></i>
                             <p class="mb-0 mt-2">Chưa có nhà cung cấp. Thêm ở trên.</p>
                           </td>
@@ -675,7 +634,7 @@
           <table class="table table-pro mb-0">
             <thead>
               <tr>
-                <th>Sản phẩm</th><th>Nhà cung cấp</th><th>Kho nhận hàng</th><th class="text-end">Giá</th><th class="text-center">Thời gian giao hàng</th><th class="text-center">Ưu tiên</th>
+                <th>Sản phẩm</th><th>Nhà cung cấp</th><th>Kho nhận hàng</th><th class="text-center">Ngày giao hàng</th>
               </tr>
             </thead>
             <tbody id="tbl-product-supplier-warehouse"></tbody>

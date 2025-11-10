@@ -84,17 +84,12 @@ CREATE TABLE products (
   unit             VARCHAR(50) NOT NULL DEFAULT 'pcs' COMMENT 'Đơn vị tính',
   min_stock_level  INT NOT NULL DEFAULT 0 COMMENT 'Mức tồn tối thiểu',
   default_warehouse_id INT NULL COMMENT 'Kho mặc định của sản phẩm',
-  parent_product_id INT NULL COMMENT 'Mã sản phẩm cha (quan hệ tự tham chiếu)',
   status           ENUM('active','inactive') NOT NULL DEFAULT 'active' COMMENT 'Trạng thái',
   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày tạo',
-  CONSTRAINT fk_products_parent
-    FOREIGN KEY (parent_product_id) REFERENCES products(product_id)
-      ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT fk_products_default_warehouse
     FOREIGN KEY (default_warehouse_id) REFERENCES warehouses(warehouse_id)
       ON UPDATE CASCADE ON DELETE SET NULL,
   INDEX idx_products_sku (sku),
-  INDEX idx_products_parent (parent_product_id),
   INDEX idx_products_category (category),
   INDEX idx_products_default_warehouse (default_warehouse_id)
 ) ENGINE=InnoDB COMMENT='Bảng sản phẩm';
@@ -107,12 +102,11 @@ CREATE TABLE product_supplier (
   product_id       INT NOT NULL COMMENT 'Mã sản phẩm',
   supplier_id      INT NOT NULL COMMENT 'Mã nhà cung cấp',
   warehouse_id     INT NULL COMMENT 'Kho nhận hàng từ nhà cung cấp này',
-  default_price    DECIMAL(15,2) NULL COMMENT 'Giá mặc định',
-  delivery_time    INT NULL COMMENT 'Thời gian giao hàng (ngày)',
-  priority         INT DEFAULT 1 COMMENT 'Độ ưu tiên (1=cao nhất)',
+  delivery_date    DATE NULL COMMENT 'Ngày giao hàng dự kiến',
   status           ENUM('active','inactive') NOT NULL DEFAULT 'active' COMMENT 'Trạng thái',
   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày tạo',
   PRIMARY KEY (product_id, supplier_id),
+  UNIQUE KEY uk_product_supplier_warehouse (product_id, supplier_id, warehouse_id),
   CONSTRAINT fk_ps_product
     FOREIGN KEY (product_id) REFERENCES products(product_id)
       ON UPDATE CASCADE ON DELETE CASCADE,
@@ -201,9 +195,7 @@ SELECT
   w.warehouse_id,
   w.warehouse_code,
   w.warehouse_name,
-  ps.default_price,
-  ps.delivery_time,
-  ps.priority
+  ps.delivery_date
 FROM products p
 JOIN product_supplier ps ON ps.product_id = p.product_id
 JOIN suppliers s ON s.supplier_id = ps.supplier_id
@@ -358,11 +350,14 @@ INSERT INTO roles (role_name, description) VALUES
   ('manager', 'Quản lý toàn bộ hệ thống'),
   ('staff', 'Nhân viên vận hành');
 
--- Users
+-- Users (password for all: admin123)
+-- Hash generated with: from werkzeug.security import generate_password_hash; generate_password_hash('admin123')
 INSERT INTO users (username, password_hash, full_name, email, role_id) VALUES
-  ('quanly1', '$2b$12$placeholder', 'Nguyễn Văn Quản Lý', 'quanly1@example.com', 
+  ('admin', 'scrypt:32768:8:1$KBxhf5q9OXcYGP0i$c8e90f5a6f9b3e7d4c2a1b8f5e9d3c7a6b4f2e8d1c9b7a5f3e1d0c8b6a4f2e9d7c5b3a1f8e6d4c2b0a9f7e5d3c1b', 'Administrator', 'admin@example.com',
    (SELECT role_id FROM roles WHERE role_name = 'manager')),
-  ('nhanvien1', '$2b$12$placeholder', 'Trần Thị Nhân Viên', 'nhanvien1@example.com',
+  ('quanly1', 'scrypt:32768:8:1$KBxhf5q9OXcYGP0i$c8e90f5a6f9b3e7d4c2a1b8f5e9d3c7a6b4f2e8d1c9b7a5f3e1d0c8b6a4f2e9d7c5b3a1f8e6d4c2b0a9f7e5d3c1b', 'Nguyễn Văn Quản Lý', 'quanly1@example.com', 
+   (SELECT role_id FROM roles WHERE role_name = 'manager')),
+  ('nhanvien1', 'scrypt:32768:8:1$KBxhf5q9OXcYGP0i$c8e90f5a6f9b3e7d4c2a1b8f5e9d3c7a6b4f2e8d1c9b7a5f3e1d0c8b6a4f2e9d7c5b3a1f8e6d4c2b0a9f7e5d3c1b', 'Trần Thị Nhân Viên', 'nhanvien1@example.com',
    (SELECT role_id FROM roles WHERE role_name = 'staff'));
 
 -- Warehouses
@@ -385,15 +380,15 @@ INSERT INTO products (sku, product_name, category, unit, min_stock_level, defaul
   ('SP-003', 'Sản phẩm 3', 'Danh mục A', 'box', 20, NULL);
 
 -- Product-Supplier relationships (có warehouse_id - tạo quan hệ Supplier-Warehouse gián tiếp)
-INSERT INTO product_supplier (product_id, supplier_id, warehouse_id, default_price, delivery_time, priority) VALUES
+INSERT INTO product_supplier (product_id, supplier_id, warehouse_id, delivery_date, status) VALUES
   ((SELECT product_id FROM products WHERE sku = 'SP-001'),
    (SELECT supplier_id FROM suppliers WHERE supplier_name = 'Nhà Cung Cấp A'),
    (SELECT warehouse_id FROM warehouses WHERE warehouse_code = 'WH-HN'),
-   100000, 7, 1),
+   DATE_ADD(CURDATE(), INTERVAL 7 DAY), 'active'),
   ((SELECT product_id FROM products WHERE sku = 'SP-002'),
    (SELECT supplier_id FROM suppliers WHERE supplier_name = 'Nhà Cung Cấp B'),
    (SELECT warehouse_id FROM warehouses WHERE warehouse_code = 'WH-HCM'),
-   50000, 5, 1);
+   DATE_ADD(CURDATE(), INTERVAL 5 DAY), 'active');
 
 -- Sample transactions
 CALL sp_stock_in(

@@ -83,13 +83,10 @@ class Product(db.Model):
     unit: Mapped[str] = mapped_column(db.String(50), default='pcs', nullable=False, comment='Đơn vị tính')
     min_stock_level: Mapped[int] = mapped_column(db.Integer, default=0, nullable=False, comment='Mức tồn tối thiểu')
     default_warehouse_id: Mapped[int | None] = mapped_column(ForeignKey('warehouses.warehouse_id'), comment='Kho mặc định của sản phẩm')
-    parent_product_id: Mapped[int | None] = mapped_column(ForeignKey('products.product_id'), comment='Mã sản phẩm cha')
     status: Mapped[str] = mapped_column(Enum('active', 'inactive', name='product_status'), default='active', nullable=False, comment='Trạng thái')
     created_at: Mapped[datetime] = mapped_column(db.TIMESTAMP, default=datetime.utcnow, nullable=False, comment='Ngày tạo')
     
     # Relationships
-    parent: Mapped['Product | None'] = relationship('Product', remote_side=[product_id], back_populates='children')
-    children: Mapped[list['Product']] = relationship('Product', back_populates='parent')
     default_warehouse: Mapped[Warehouse | None] = relationship('Warehouse', foreign_keys=[default_warehouse_id], back_populates='default_products')
     suppliers: Mapped[list['ProductSupplier']] = relationship('ProductSupplier', back_populates='product')
     transactions: Mapped[list['InventoryTransaction']] = relationship('InventoryTransaction', back_populates='product')
@@ -102,9 +99,7 @@ class ProductSupplier(db.Model):
     product_id: Mapped[int] = mapped_column(ForeignKey('products.product_id'), primary_key=True, comment='Mã sản phẩm')
     supplier_id: Mapped[int] = mapped_column(ForeignKey('suppliers.supplier_id'), primary_key=True, comment='Mã nhà cung cấp')
     warehouse_id: Mapped[int | None] = mapped_column(ForeignKey('warehouses.warehouse_id'), comment='Kho nhận hàng từ nhà cung cấp này')
-    default_price: Mapped[float | None] = mapped_column(DECIMAL(15, 2), comment='Giá mặc định')
-    delivery_time: Mapped[int | None] = mapped_column(db.Integer, comment='Thời gian giao hàng (ngày)')
-    priority: Mapped[int] = mapped_column(db.Integer, default=1, comment='Độ ưu tiên')
+    delivery_date: Mapped[datetime | None] = mapped_column(db.Date, comment='Ngày giao hàng dự kiến')
     status: Mapped[str] = mapped_column(Enum('active', 'inactive', name='ps_status'), default='active', nullable=False, comment='Trạng thái')
     created_at: Mapped[datetime] = mapped_column(db.TIMESTAMP, default=datetime.utcnow, nullable=False, comment='Ngày tạo')
     

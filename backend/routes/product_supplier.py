@@ -71,9 +71,7 @@ def add_products_to_supplier(supplier_id: int):
         
         if existing:
             # Update existing relationship
-            existing.default_price = item.get('price')
-            existing.delivery_time = item.get('delivery_time')
-            existing.priority = item.get('priority', 'medium')
+            existing.delivery_date = item.get('delivery_date')
             existing.status = item.get('status', 'active')
             added.append({
                 'product_id': product_id,
@@ -89,9 +87,7 @@ def add_products_to_supplier(supplier_id: int):
                     product_id=product_id,
                     supplier_id=supplier_id,
                     warehouse_id=warehouse_id,
-                    default_price=item.get('price'),
-                    delivery_time=item.get('delivery_time'),
-                    priority=item.get('priority', 'medium'),
+                    delivery_date=item.get('delivery_date'),
                     status=item.get('status', 'active')
                 )
                 db.session.add(ps)
@@ -140,9 +136,7 @@ def get_supplier_products(supplier_id: int):
             'warehouse_id': ps.warehouse_id,
             'warehouse_code': ps.warehouse.warehouse_code if ps.warehouse else None,
             'warehouse_name': ps.warehouse.warehouse_name if ps.warehouse else None,
-            'default_price': float(ps.default_price) if ps.default_price else None,
-            'delivery_time': ps.delivery_time,
-            'priority': ps.priority,
+            'delivery_date': str(ps.delivery_date) if ps.delivery_date else None,
             'status': ps.status,
         })
     
@@ -192,12 +186,8 @@ def update_supplier_product(supplier_id: int, product_id: int):
     if not ps:
         return jsonify(message='Quan hệ không tồn tại'), 404
     
-    if 'price' in data:
-        ps.default_price = data['price']
-    if 'delivery_time' in data:
-        ps.delivery_time = data['delivery_time']
-    if 'priority' in data:
-        ps.priority = data['priority']
+    if 'delivery_date' in data:
+        ps.delivery_date = data['delivery_date']
     if 'status' in data:
         ps.status = data['status']
     

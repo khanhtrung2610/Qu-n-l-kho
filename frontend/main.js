@@ -126,21 +126,19 @@ async function loadSuppliers() {
       if (!tbody) return;
       tbody.innerHTML = '';
       if (!items.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Chưa có quan hệ nào</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>Chưa có quan hệ nào</td></tr>';
         return;
       }
       items.forEach(r => {
         const tr = document.createElement('tr');
-        const priceDisplay = r.default_price ? `${Number(r.default_price).toLocaleString('vi-VN')} đ` : '<span class="text-muted">-</span>';
-        const deliveryDisplay = r.delivery_time ? `<span class="badge bg-secondary">${r.delivery_time} ngày</span>` : '<span class="text-muted">-</span>';
-        const priorityBadge = r.priority === 'high' ? 'bg-danger' : r.priority === 'medium' ? 'bg-warning' : 'bg-info';
+        const deliveryDisplay = r.delivery_date ? 
+          `<span class="badge bg-primary"><i class="bi bi-calendar-event me-1"></i>${new Date(r.delivery_date).toLocaleDateString('vi-VN')}</span>` : 
+          '<span class="text-muted">-</span>';
         tr.innerHTML = `
           <td><i class="bi bi-box text-muted me-1"></i><span class="fw-semibold">${r.product_sku}</span> - ${r.product_name}</td>
           <td><i class="bi bi-truck text-muted me-1"></i>${r.supplier_name}</td>
           <td>${r.warehouse_code ? `<i class="bi bi-building text-muted me-1"></i>${r.warehouse_code} - ${r.warehouse_name}` : '<span class="text-muted">-</span>'}</td>
-          <td class="text-end fw-semibold text-success">${priceDisplay}</td>
-          <td class="text-center">${deliveryDisplay}</td>
-          <td class="text-center"><span class="badge ${priorityBadge}">${r.priority || '-'}</span></td>`;
+          <td class="text-center">${deliveryDisplay}</td>`;
         tbody.appendChild(tr);
       });
     } catch (e) {
@@ -1683,9 +1681,7 @@ async function openSupModal(data) {
         const productsData = supplierProducts.map(p => ({
           product_id: p.product_id,
           warehouse_id: p.warehouse_id || null,
-          price: p.default_price || null,
-          delivery_time: p.delivery_time || null,
-          priority: p.priority || 'medium',
+          delivery_date: p.delivery_date || null,
           status: p.status || 'active'
         }));
         
@@ -1710,9 +1706,7 @@ async function openSupModal(data) {
 function addProductToSupplier() {
   const productId = Number(el('sup-add-product').value);
   const warehouseId = Number(el('sup-add-warehouse').value) || null;
-  const price = Number(el('sup-add-price').value) || null;
-  const delivery = Number(el('sup-add-delivery').value) || null;
-  const priority = el('sup-add-priority').value;
+  const deliveryDate = el('sup-add-delivery').value || null;
   
   if (!productId) {
     alert('Vui lòng chọn sản phẩm');
@@ -1740,18 +1734,14 @@ function addProductToSupplier() {
     warehouse_id: warehouseId,
     warehouse_code: warehouse?.code,
     warehouse_name: warehouse?.name,
-    default_price: price,
-    delivery_time: delivery,
-    priority: priority,
+    delivery_date: deliveryDate,
     status: 'active'
   });
   
   // Reset form
   el('sup-add-product').value = '';
   el('sup-add-warehouse').value = '';
-  el('sup-add-price').value = '';
   el('sup-add-delivery').value = '';
-  el('sup-add-priority').value = 'medium';
   
   renderSupplierProducts();
 }
@@ -1762,7 +1752,7 @@ function renderSupplierProducts() {
   
   if (supplierProducts.length === 0) {
     tbody.innerHTML = `<tr>
-      <td colspan="7" class="text-center text-muted py-4">
+      <td colspan="5" class="text-center text-muted py-4">
         <i class="bi bi-inbox fs-3"></i>
         <p class="mb-0 mt-2">Chưa có sản phẩm nào. Vui lòng thêm sản phẩm ở trên.</p>
       </td>
@@ -1773,22 +1763,14 @@ function renderSupplierProducts() {
   tbody.innerHTML = '';
   supplierProducts.forEach((item, idx) => {
     const tr = document.createElement('tr');
-    const priceDisplay = item.default_price ? 
-      Number(item.default_price).toLocaleString('vi-VN') + ' đ' : 
+    const deliveryDisplay = item.delivery_date ? 
+      `<span class="badge bg-primary"><i class="bi bi-calendar-event me-1"></i>${new Date(item.delivery_date).toLocaleDateString('vi-VN')}</span>` : 
       '<span class="text-muted">-</span>';
-    const deliveryDisplay = item.delivery_time ? 
-      `${item.delivery_time} ngày` : 
-      '<span class="text-muted">-</span>';
-    const priorityBadge = item.priority === 'high' ? 'bg-danger' : 
-      item.priority === 'medium' ? 'bg-warning' : 'bg-info';
     
     tr.innerHTML = `
       <td><i class="bi bi-box text-muted me-2"></i><strong>${item.product_sku}</strong> - ${item.product_name}</td>
       <td>${item.warehouse_code ? `<i class="bi bi-building text-muted me-1"></i>${item.warehouse_code} - ${item.warehouse_name}` : '<span class="text-muted">-</span>'}</td>
-      <td class="text-end">${priceDisplay}</td>
       <td class="text-center">${deliveryDisplay}</td>
-      <td class="text-center"><span class="badge ${priorityBadge}">${item.priority}</span></td>
-      <td class="text-center"><span class="badge bg-success">active</span></td>
       <td class="text-center">
         <button class="btn btn-sm btn-danger" data-remove="${idx}" title="Xóa">
           <i class="bi bi-trash"></i>
@@ -1836,14 +1818,7 @@ async function openProdCrudModal(data) {
     catalog.warehouses.map(w => `<option value="${w.id}">${w.code} - ${w.name}</option>`).join('');
   if (data?.default_warehouse_id) whSel.value = data.default_warehouse_id;
   
-  // Load parent products dropdown (Tab 1)
-  const parentSel = el('prod-parent');
-  const currentId = data?.id;
-  parentSel.innerHTML = '<option value="">-- Không có --</option>' + 
-    catalog.products.filter(p => p.id !== currentId).map(p => 
-      `<option value="${p.id}">${p.sku} - ${p.name}</option>`
-    ).join('');
-  if (data?.parent_product_id) parentSel.value = data.parent_product_id;
+  // Parent product removed from UI
   
   // Tab 2: Populate supplier dropdown
   const supplierSel = el('prod-add-supplier');
@@ -1891,7 +1866,6 @@ async function openProdCrudModal(data) {
       reorder_level: Number(el('prod-reorder').value||0),
       status: el('prod-status').value,
       default_warehouse_id: el('prod-default-warehouse').value ? Number(el('prod-default-warehouse').value) : null,
-      parent_product_id: el('prod-parent').value ? Number(el('prod-parent').value) : null,
     };
     if (!idEl.value && !body.sku) { alert('SKU bắt buộc'); return; }
     if (!body.name) { alert('Tên bắt buộc'); return; }
@@ -1912,9 +1886,7 @@ async function openProdCrudModal(data) {
           const productsData = [{
             product_id: productId,
             warehouse_id: sup.warehouse_id || null,
-            price: sup.default_price || null,
-            delivery_time: sup.delivery_time || null,
-            priority: sup.priority || 'medium',
+            delivery_date: sup.delivery_date || null,
             status: 'active'
           }];
           await api(`/product-supplier/supplier/${supplierId}/products`, {
@@ -1940,9 +1912,7 @@ async function openProdCrudModal(data) {
 function addSupplierToProduct() {
   const supplierId = Number(el('prod-add-supplier').value);
   const warehouseId = Number(el('prod-add-warehouse').value) || null;
-  const price = Number(el('prod-add-price').value) || null;
-  const delivery = Number(el('prod-add-delivery').value) || null;
-  const priority = el('prod-add-priority').value;
+  const deliveryDate = el('prod-add-delivery').value || null;
   
   if (!supplierId) {
     alert('Vui lòng chọn nhà cung cấp');
@@ -1968,17 +1938,13 @@ function addSupplierToProduct() {
     warehouse_id: warehouseId,
     warehouse_code: warehouse?.code,
     warehouse_name: warehouse?.name,
-    default_price: price,
-    delivery_time: delivery,
-    priority: priority,
+    delivery_date: deliveryDate,
     status: 'active'
   });
   
   el('prod-add-supplier').value = '';
   el('prod-add-warehouse').value = '';
-  el('prod-add-price').value = '';
   el('prod-add-delivery').value = '';
-  el('prod-add-priority').value = 'medium';
   
   renderProductSuppliers();
 }
@@ -1989,7 +1955,7 @@ function renderProductSuppliers() {
   
   if (productSuppliers.length === 0) {
     tbody.innerHTML = `<tr>
-      <td colspan="7" class="text-center text-muted py-4">
+      <td colspan="5" class="text-center text-muted py-4">
         <i class="bi bi-inbox fs-3"></i>
         <p class="mb-0 mt-2">Chưa có nhà cung cấp. Thêm ở trên.</p>
       </td>
@@ -2000,22 +1966,14 @@ function renderProductSuppliers() {
   tbody.innerHTML = '';
   productSuppliers.forEach((item, idx) => {
     const tr = document.createElement('tr');
-    const priceDisplay = item.default_price ? 
-      Number(item.default_price).toLocaleString('vi-VN') + ' đ' : 
+    const deliveryDisplay = item.delivery_date ? 
+      `<span class="badge bg-primary"><i class="bi bi-calendar-event me-1"></i>${new Date(item.delivery_date).toLocaleDateString('vi-VN')}</span>` : 
       '<span class="text-muted">-</span>';
-    const deliveryDisplay = item.delivery_time ? 
-      `${item.delivery_time} ngày` : 
-      '<span class="text-muted">-</span>';
-    const priorityBadge = item.priority === 'high' ? 'bg-danger' : 
-      item.priority === 'medium' ? 'bg-warning' : 'bg-info';
     
     tr.innerHTML = `
       <td><i class="bi bi-truck text-muted me-2"></i><strong>${item.supplier_name}</strong></td>
       <td>${item.warehouse_code ? `<i class="bi bi-building text-muted me-1"></i>${item.warehouse_code} - ${item.warehouse_name}` : '<span class="text-muted">-</span>'}</td>
-      <td class="text-end">${priceDisplay}</td>
       <td class="text-center">${deliveryDisplay}</td>
-      <td class="text-center"><span class="badge ${priorityBadge}">${item.priority}</span></td>
-      <td class="text-center"><span class="badge bg-success">active</span></td>
       <td class="text-center">
         <button class="btn btn-sm btn-danger" data-remove="${idx}" title="Xóa">
           <i class="bi bi-trash"></i>

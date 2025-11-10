@@ -31,9 +31,7 @@ def product_supplier_warehouse():
             'warehouse_id': ps.warehouse_id,
             'warehouse_code': ps.warehouse.warehouse_code if ps.warehouse else None,
             'warehouse_name': ps.warehouse.warehouse_name if ps.warehouse else None,
-            'default_price': float(ps.default_price) if ps.default_price else None,
-            'delivery_time': ps.delivery_time,
-            'priority': ps.priority,
+            'delivery_date': str(ps.delivery_date) if ps.delivery_date else None,
         })
     
     return jsonify(items=items)
@@ -61,32 +59,7 @@ def warehouse_managers():
     return jsonify(items=items)
 
 
-@bp.get('/product-parents')
-@jwt_required()
-def product_parents():
-    """Get product parent-child relationships"""
-    products = Product.query.options(
-        joinedload(Product.parent),
-        joinedload(Product.children)
-    ).all()
-    
-    items = []
-    for p in products:
-        children = [{'id': c.product_id, 'sku': c.sku, 'name': c.product_name} for c in p.children]
-        items.append({
-            'product_id': p.product_id,
-            'sku': p.sku,
-            'product_name': p.product_name,
-            'parent_id': p.parent_product_id,
-            'parent_sku': p.parent.sku if p.parent else None,
-            'parent_name': p.parent.product_name if p.parent else None,
-            'children': children,
-            'default_warehouse_id': p.default_warehouse_id,
-            'default_warehouse_code': p.default_warehouse.warehouse_code if p.default_warehouse else None,
-            'default_warehouse_name': p.default_warehouse.warehouse_name if p.default_warehouse else None,
-        })
-    
-    return jsonify(items=items)
+# Product parent-child relationships removed
 
 
 @bp.get('/supplier-warehouses')

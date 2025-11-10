@@ -34,9 +34,6 @@ def _product_to_dict(p: Product):
         'default_warehouse_id': p.default_warehouse_id,
         'default_warehouse_code': p.default_warehouse.warehouse_code if p.default_warehouse else None,
         'default_warehouse_name': p.default_warehouse.warehouse_name if p.default_warehouse else None,
-        'parent_product_id': p.parent_product_id,
-        'parent_product_sku': p.parent.sku if p.parent else None,
-        'parent_product_name': p.parent.product_name if p.parent else None,
     }
 
 
@@ -68,7 +65,6 @@ def create_product():
             min_stock_level=int(data.get('reorder_level') or 0),
             status=data.get('status') or 'active',
             default_warehouse_id=data.get('default_warehouse_id'),
-            parent_product_id=data.get('parent_product_id'),
         )
         db.session.add(p)
         db.session.commit()
@@ -95,12 +91,11 @@ def update_product(pid):
         'reorder_level': 'min_stock_level',
         'status': 'status',
         'default_warehouse_id': 'default_warehouse_id',
-        'parent_product_id': 'parent_product_id'
     }
     for frontend_field, backend_field in field_mapping.items():
         if frontend_field in data:
             val = data[frontend_field]
-            if backend_field in ['default_warehouse_id', 'parent_product_id']:
+            if backend_field in ['default_warehouse_id']:
                 setattr(p, backend_field, val if val else None)
             else:
                 setattr(p, backend_field, val)
