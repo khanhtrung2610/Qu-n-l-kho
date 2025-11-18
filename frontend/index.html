@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quản Lý Kho</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="styles.css?v=2.0.0" rel="stylesheet">
+  <link href="styles-addon.css?v=2.0.0" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark d-none" id="top-navbar">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Quản Lý kho </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="nav-links" hidden>
+        <li class="nav-item"><a class="nav-link" href="#" data-page="dashboard">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" data-page="products">Sản phẩm</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="nav-operations" role="button" data-bs-toggle="dropdown" aria-expanded="false">Hoạt động</a>
+          <ul class="dropdown-menu" aria-labelledby="nav-operations">
+            <li><a class="dropdown-item" href="#" data-page="stock" data-mode="in">Nhập</a></li>
+            <li><a class="dropdown-item" href="#" data-page="stock" data-mode="out">Xuất</a></li>
+            <li><a class="dropdown-item" href="#" data-page="stock" data-mode="adjust">Điều chỉnh</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="#" data-page="reports">Báo cáo</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" data-page="warehouses">Kho</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" data-page="suppliers">Nhà cung cấp</a></li>
+        <li class="nav-item" id="users-link" hidden><a class="nav-link" href="#" data-page="users">Người dùng</a></li>
+      </ul>
+      <div class="d-flex">
+        <span class="navbar-text me-3" id="current-user"></span>
+        <button class="btn btn-outline-light btn-sm" id="btn-logout" hidden>Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="sb d-none">
+  <div class="sb-header">
+    <div class="sb-logo"><i class="bi bi-box-seam"></i></div>
+    <div class="sb-title">Inventory</div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar"><i class="bi bi-person-circle"></i></div>
+    <div class="small text-muted">Welcome,</div>
+    <div id="current-user-side" class="sb-username">Guest</div>
+  </div>
+  <nav class="sb-menu">
+    <div class="sb-group">GENERAL</div>
+    <a class="sb-link nav-link" href="#" data-page="dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+    <a class="sb-link nav-link" href="#" data-page="products"><i class="bi bi-grid me-2"></i>Sản phẩm</a>
+    <div class="sb-group">Kho</div>
+    <a class="sb-link nav-link" href="#" data-page="reports"><i class="bi bi-graph-up me-2"></i>Báo cáo</a>
+    <a class="sb-link nav-link" href="#" data-page="warehouses"><i class="bi bi-buildings me-2"></i>Danh mục kho</a>
+    <a class="sb-link nav-link" href="#" data-page="suppliers"><i class="bi bi-truck me-2"></i>Nhà cung cấp</a>
+    <div class="sb-subtitle">Hoạt động</div>
+    <a class="sb-sublink dropdown-item" href="#" data-page="stock" data-mode="in"><i class="bi bi-box-arrow-in-down me-2"></i>Danh sách nhập</a>
+    <a class="sb-sublink dropdown-item" href="#" data-page="stock" data-mode="out"><i class="bi bi-box-arrow-up me-2"></i>Danh sách xuất</a>
+    <a class="sb-sublink dropdown-item" href="#" data-page="stock" data-mode="adjust"><i class="bi bi-sliders me-2"></i>Điều chỉnh</a>
+    <div class="sb-group">Quản lý</div>
+    <a class="sb-link nav-link" href="#" id="users-link-side" data-page="users" hidden><i class="bi bi-people me-2"></i>Người dùng</a>
+  </nav>
+  <div class="sb-footer">
+    <button class="btn btn-outline-light btn-sm w-100" id="btn-logout-side">Đăng xuất</button>
+  </div>
+  <div class="sb-copyright small">v1.0</div>
+  
+</aside>
+
+<main class="container-fluid with-sidebar">
+  <!-- Login -->
+  <section id="page-login">
+    <div class="row justify-content-center">
+      <div class="col-lg-4 col-md-6">
+        <div class="card shadow pro-login-card">
+          <div class="card-body p-4">
+            <div class="text-center mb-3">
+              <div class="brand-badge mb-2"><i class="bi bi-box-seam"></i></div>
+              <div class="h5 mb-0">Đăng nhập</div>
+              <div class="text-muted small">Truy cập hệ thống Quản Lý Kho</div>
+            </div>
+
+            <div class="mb-3">
+              <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input class="form-control" id="login-username" placeholder="Username" autocomplete="username" />
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" class="form-control" id="login-password" placeholder="Password" autocomplete="current-password" />
+                <button class="btn btn-outline-secondary" type="button" id="btn-toggle-pw"><i class="bi bi-eye"></i></button>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="login-remember" />
+                <label class="form-check-label" for="login-remember">Ghi nhớ</label>
+              </div>
+              <a href="#" class="small text-decoration-none text-muted" id="lnk-forgot">Quên mật khẩu?</a>
+            </div>
+
+            <button class="btn btn-primary w-100 btn-lg" id="btn-login">
+              <span class="spinner-border spinner-border-sm me-2 d-none" id="btn-login-spinner"></span>
+              Đăng nhập
+            </button>
+
+            <div class="text-center text-muted my-3"><small>hoặc</small></div>
+
+            <div class="d-grid gap-2">
+              <button class="btn btn-outline-danger" id="btn-google"><i class="bi bi-google me-2"></i>Đăng nhập với Google</button>
+              <button class="btn btn-outline-dark" id="btn-github"><i class="bi bi-github me-2"></i>Đăng nhập với GitHub</button>
+            </div>
+
+            <div class="text-danger small mt-3" id="login-error"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supplier Modal -->
+  <div class="modal fade" id="sup-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="sup-title">Nhà cung cấp</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="sup-id" />
+          
+          <!-- Tabs Navigation -->
+          <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="sup-tab-info" data-bs-toggle="tab" data-bs-target="#sup-pane-info" type="button">
+                <i class="bi bi-info-circle me-1"></i> Thông tin cơ bản
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="sup-tab-products" data-bs-toggle="tab" data-bs-target="#sup-pane-products" type="button">
+                <i class="bi bi-box-seam me-1"></i> Sản phẩm & Kho
+              </button>
+            </li>
+          </ul>
+
+          <!-- Tab Contents -->
+          <div class="tab-content">
+            <!-- Tab 1: Basic Info -->
+            <div class="tab-pane fade show active" id="sup-pane-info" role="tabpanel">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3"><label class="form-label">Tên nhà cung cấp <span class="text-danger">*</span></label><input class="form-control" id="sup-name" placeholder="VD: Công ty TNHH ABC" /></div>
+                  <div class="mb-3"><label class="form-label">Người liên hệ</label><input class="form-control" id="sup-contact" placeholder="VD: Nguyễn Văn A" /></div>
+                  <div class="mb-3"><label class="form-label">Điện thoại</label><input class="form-control" id="sup-phone" placeholder="VD: 0901234567" /></div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" id="sup-email" placeholder="VD: contact@abc.com" /></div>
+                  <div class="mb-3"><label class="form-label">Địa chỉ</label><textarea class="form-control" id="sup-address" rows="2" placeholder="VD: 123 Đường ABC, Quận 1, TP.HCM"></textarea></div>
+                  <div class="mb-3"><label class="form-label">Trạng thái</label><select class="form-select" id="sup-status"><option value="active">Hoạt động</option><option value="inactive">Ngừng hoạt động</option></select></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 2: Products & Warehouses -->
+            <div class="tab-pane fade" id="sup-pane-products" role="tabpanel">
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Hướng dẫn:</strong> Thêm các sản phẩm mà nhà cung cấp này có thể cung cấp, kèm kho nhận hàng và giá.
+              </div>
+
+              <!-- Add Product Form -->
+              <div class="card mb-3">
+                <div class="card-header bg-light">
+                  <i class="bi bi-plus-circle me-2"></i> Thêm sản phẩm mới
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <label class="form-label">Sản phẩm <span class="text-danger">*</span></label>
+                      <select class="form-select" id="sup-add-product">
+                        <option value="">-- Chọn sản phẩm --</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label">Kho nhận hàng</label>
+                      <select class="form-select" id="sup-add-warehouse">
+                        <option value="">-- Chọn kho --</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label">Ngày giao hàng dự kiến</label>
+                      <input type="date" class="form-control" id="sup-add-delivery" />
+                    </div>
+                    <div class="col-md-1">
+                      <label class="form-label d-block">&nbsp;</label>
+                      <button type="button" class="btn btn-success w-100" id="sup-btn-add-product" title="Thêm">
+                        <i class="bi bi-plus-lg"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Products List -->
+              <div class="card">
+                <div class="card-header bg-light">
+                  <i class="bi bi-list-ul me-2"></i> Danh sách sản phẩm
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th style="width: 40%">Sản phẩm</th>
+                          <th style="width: 30%">Kho</th>
+                          <th style="width: 20%" class="text-center">Ngày giao hàng</th>
+                          <th style="width: 10%" class="text-center">Xóa</th>
+                        </tr>
+                      </thead>
+                      <tbody id="sup-products-list">
+                        <tr>
+                          <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-3"></i>
+                            <p class="mb-0 mt-2">Chưa có sản phẩm nào. Vui lòng thêm sản phẩm ở trên.</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" id="sup-save">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Modal (create/edit) -->
+  <div class="modal fade" id="prod-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="prod-title">Sản phẩm</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="prod-id" />
+          
+          <!-- Tabs -->
+          <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="prod-tab-info" data-bs-toggle="tab" data-bs-target="#prod-pane-info" type="button">
+                <i class="bi bi-info-circle me-1"></i> Thông tin cơ bản
+              </button>
+            </li>
+          </ul>
+
+          <!-- Tab Contents -->
+          <div class="tab-content">
+            <!-- Tab 1: Basic Info -->
+            <div class="tab-pane fade show active" id="prod-pane-info" role="tabpanel">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3"><label class="form-label">SKU <span class="text-danger">*</span></label><input class="form-control" id="prod-sku" placeholder="VD: SP001" /></div>
+                  <div class="mb-3"><label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label><input class="form-control" id="prod-name" placeholder="VD: Laptop Dell Inspiron" /></div>
+                  <div class="mb-3"><label class="form-label">Danh mục</label><input class="form-control" id="prod-category" placeholder="VD: Electronics" /></div>
+                  <div class="mb-3"><label class="form-label">Đơn vị tính</label><input class="form-control" id="prod-unit" placeholder="VD: cái, hộp, kg" value="pcs" /></div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3"><label class="form-label">Ngưỡng cảnh báo tồn kho</label><input type="number" class="form-control" id="prod-reorder" placeholder="0" min="0" /></div>
+                  <div class="mb-3">
+                    <label class="form-label">Kho chính</label>
+                    <select class="form-select" id="prod-default-warehouse">
+                      <option value="">-- Không có --</option>
+                    </select>
+                    <small class="text-muted">Kho chính lưu trữ sản phẩm này</small>
+                  </div>
+                  <div class="mb-3"><label class="form-label">Trạng thái</label><select class="form-select" id="prod-status"><option value="active">Hoạt động</option><option value="inactive">Ngừng bán</option></select></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" id="prod-save">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Modal (create/edit basic) -->
+  <div class="modal fade" id="user-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="user-title">Người dùng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="user-id" />
+          <div class="mb-3"><label class="form-label">Username</label><input class="form-control" id="user-username" /></div>
+          <div class="mb-3"><label class="form-label">Họ tên</label><input class="form-control" id="user-fullname" /></div>
+          <div class="mb-3"><label class="form-label">Role</label><select class="form-select" id="user-role"><option value="manager">manager</option><option value="staff">staff</option></select></div>
+          <div class="mb-3" id="user-password-wrap"><label class="form-label">Mật khẩu</label><input type="password" class="form-control" id="user-password" /></div>
+          <div class="mb-3"><label class="form-label">Trạng thái</label><select class="form-select" id="user-status"><option value="active">active</option><option value="inactive">inactive</option></select></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" id="user-save">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Reset Password Modal -->
+  <div class="modal fade" id="user-pw-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Đặt lại mật khẩu</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body">
+          <input type="hidden" id="user-pw-id" />
+          <div class="mb-3"><label class="form-label">Mật khẩu mới</label><input type="password" id="user-new-password" class="form-control" /></div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-primary" id="user-pw-save">Lưu</button></div>
+      </div>
+    </div>
+  </div>
+  <!-- Warehouse Modal -->
+  <div class="modal fade" id="wh-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="wh-title">Kho</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="wh-id" />
+          
+          <!-- Tabs -->
+          <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="wh-tab-info" data-bs-toggle="tab" data-bs-target="#wh-pane-info" type="button">
+                <i class="bi bi-info-circle me-1"></i> Thông tin cơ bản
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="wh-tab-products" data-bs-toggle="tab" data-bs-target="#wh-pane-products" type="button">
+                <i class="bi bi-box-seam me-1"></i> Sản phẩm mặc định
+              </button>
+            </li>
+          </ul>
+
+          <!-- Tab Contents -->
+          <div class="tab-content">
+            <!-- Tab 1: Basic Info -->
+            <div class="tab-pane fade show active" id="wh-pane-info" role="tabpanel">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Mã kho <span class="text-danger">*</span></label>
+                    <input class="form-control" id="wh-code" placeholder="VD: KHO-HN" />
+                    <small class="text-muted">Mã định danh duy nhất cho kho</small>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Tên kho <span class="text-danger">*</span></label>
+                    <input class="form-control" id="wh-name" placeholder="VD: Kho Hà Nội" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Địa điểm</label>
+                    <textarea class="form-control" id="wh-location" rows="2" placeholder="VD: 123 Đường ABC, Quận Đống Đa, Hà Nội"></textarea>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Người quản lý kho</label>
+                    <select class="form-select" id="wh-manager">
+                      <option value="">-- Chọn người quản lý --</option>
+                    </select>
+                    <small class="text-muted">Chỉ hiển thị users có role = Manager</small>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select class="form-select" id="wh-status">
+                      <option value="active">Hoạt động</option>
+                      <option value="inactive">Ngừng hoạt động</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 2: Main Products (using this warehouse as default) -->
+            <div class="tab-pane fade" id="wh-pane-products" role="tabpanel">
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Thông tin:</strong> Hiển thị các sản phẩm coi kho này là kho chính.
+              </div>
+              
+              <div class="card">
+                <div class="card-header bg-light">
+                  <i class="bi bi-list-ul me-2"></i> Sản phẩm có kho chính tại đây
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th style="width: 20%">SKU</th>
+                          <th style="width: 35%">Tên sản phẩm</th>
+                          <th style="width: 20%">Danh mục</th>
+                          <th style="width: 15%" class="text-center">Đơn vị</th>
+                          <th style="width: 10%" class="text-center">Trạng thái</th>
+                        </tr>
+                      </thead>
+                      <tbody id="wh-products-list">
+                        <tr>
+                          <td colspan="5" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-3"></i>
+                            <p class="mb-0 mt-2">Chưa có sản phẩm nào sử dụng kho này làm kho chính.</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mt-3">
+                <small class="text-muted">
+                  <i class="bi bi-lightbulb me-1"></i>
+                  <strong>Gợi ý:</strong> Để thêm sản phẩm vào kho này, hãy vào trang <strong>Sản phẩm</strong> và chọn kho này làm "Kho chính" khi tạo/sửa sản phẩm.
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" id="wh-save">
+            <i class="bi bi-save me-1"></i> Lưu thông tin
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warehouses -->
+  <section id="page-warehouses" class="d-none">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="mb-0">Kho</h5>
+      <div class="d-flex gap-2">
+        <input id="wh-search" class="form-control form-control-sm" style="width:260px" placeholder="Tìm mã/tên/khu vực..." />
+        <button class="btn btn-outline-success btn-sm" id="btn-export-wh">Excel</button>
+        <button class="btn btn-primary btn-sm" id="btn-new-wh">Thêm</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="table table-pro">
+        <thead>
+          <tr>
+            <th>Mã</th><th>Tên</th><th>Địa điểm</th><th>Người quản lý</th><th>Trạng thái</th><th style="width:120px"></th>
+          </tr>
+        </thead>
+        <tbody id="tbl-warehouses"></tbody>
+      </table>
+    </div>
+    
+    <!-- Warehouse-Supplier Relationships -->
+    <div class="card shadow-sm mt-4">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-link-45deg text-primary"></i>
+        <span class="fw-semibold">Nhà cung cấp phục vụ kho này</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-wrap">
+          <table class="table table-pro mb-0">
+            <thead>
+              <tr>
+                <th>Kho</th><th>Nhà cung cấp</th><th class="text-center">Số sản phẩm</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-warehouse-supplier"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Suppliers -->
+  <section id="page-suppliers" class="d-none">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="mb-0">Nhà cung cấp</h5>
+      <div class="d-flex gap-2">
+        <input id="sup-search" class="form-control form-control-sm" style="width:260px" placeholder="Tìm tên/điện thoại/email..." />
+        <button class="btn btn-outline-success btn-sm" id="btn-export-sup">Excel</button>
+        <button class="btn btn-primary btn-sm" id="btn-new-sup">Thêm</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="table table-pro">
+        <thead>
+          <tr>
+            <th>Tên</th><th>Liên hệ</th><th>Điện thoại</th><th>Email</th><th>Địa chỉ</th><th>Trạng thái</th><th style="width:110px"></th>
+          </tr>
+        </thead>
+        <tbody id="tbl-suppliers"></tbody>
+      </table>
+    </div>
+    
+    <!-- Supplier-Warehouse Relationships -->
+    <div class="card shadow-sm mt-4">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-diagram-3 text-info"></i>
+        <span class="fw-semibold">Quan hệ Nhà cung cấp - Kho</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-wrap">
+          <table class="table table-pro mb-0">
+            <thead>
+              <tr>
+                <th>Nhà cung cấp</th><th>Kho</th><th class="text-center">Số sản phẩm</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-supplier-warehouse"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Product-Supplier-Warehouse Relationships -->
+    <div class="card shadow-sm mt-4">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-box-seam text-success"></i>
+        <span class="fw-semibold">Quan hệ Sản phẩm - Nhà cung cấp - Kho (Chi tiết)</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-wrap">
+          <table class="table table-pro mb-0">
+            <thead>
+              <tr>
+                <th>Sản phẩm</th><th>Nhà cung cấp</th><th>Kho nhận hàng</th><th class="text-center">Ngày giao hàng</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-product-supplier-warehouse"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard -->
+  <section id="page-dashboard" class="d-none">
+    <!-- KPIs -->
+    <div class="row g-3">
+      <div class="col-sm-6 col-lg-3">
+        <div class="card kpi pro">
+          <div class="card-body d-flex align-items-center">
+            <div class="kpi-icon me-3 bg-primary-subtle text-primary"><i class="bi bi-box-seam"></i></div>
+            <div>
+              <div class="kpi-title">Sản phẩm</div>
+              <div class="kpi-value" id="kpi-products">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card kpi pro">
+          <div class="card-body d-flex align-items-center">
+            <div class="kpi-icon me-3 bg-info-subtle text-info"><i class="bi bi-buildings"></i></div>
+            <div>
+              <div class="kpi-title">Kho</div>
+              <div class="kpi-value" id="kpi-warehouses">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card kpi pro">
+          <div class="card-body d-flex align-items-center">
+            <div class="kpi-icon me-3 bg-warning-subtle text-warning"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+              <div class="kpi-title">Tồn thấp</div>
+              <div class="kpi-value" id="kpi-low">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card kpi pro">
+          <div class="card-body d-flex align-items-center">
+            <div class="kpi-icon me-3 bg-success-subtle text-success"><i class="bi bi-arrow-repeat"></i></div>
+            <div>
+              <div class="kpi-title">Giao dịch (tháng)</div>
+              <div class="kpi-value" id="kpi-tx">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="card shadow-sm mt-3 recent-card">
+      <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+        <button class="btn btn-outline-success" id="qa-in"><i class="bi bi-box-arrow-in-down me-1"></i>Nhập kho</button>
+        <button class="btn btn-outline-warning" id="qa-out"><i class="bi bi-box-arrow-up me-1"></i>Xuất kho</button>
+        <button class="btn btn-outline-secondary" id="qa-adjust"><i class="bi bi-sliders me-1"></i>Điều chỉnh</button>
+        <div class="vr mx-2 d-none d-md-block"></div>
+        <button class="btn btn-outline-primary" id="qa-products"><i class="bi bi-grid me-1"></i>Sản phẩm</button>
+        <button class="btn btn-outline-info" id="qa-reports"><i class="bi bi-graph-up me-1"></i>Báo cáo</button>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-4 mt-1">
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Nhập/Xuất theo tháng/tuần</span>
+            <div class="btn-group btn-group-sm" role="group" aria-label="time-scale">
+              <button type="button" class="btn btn-outline-secondary active" id="btn-scale-month">Tháng</button>
+              <button type="button" class="btn btn-outline-secondary" id="btn-scale-week">Tuần</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="chart-monthly"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Top biến động 30 ngày</span>
+          </div>
+          <div class="card-body">
+            <canvas id="chart-top"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Low-stock slider -->
+    <div class="card shadow-sm mt-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Cảnh báo tồn thấp</span>
+      </div>
+      <div class="card-body">
+        <div id="low-carousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="7000">
+          <div class="carousel-inner" id="low-carousel-inner">
+            <!-- items rendered by JS -->
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#low-carousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#low-carousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+        <div id="low-empty" class="text-muted text-center py-4" style="display:none">Không có mặt hàng tồn thấp</div>
+      </div>
+    </div>
+
+    
+  </section>
+
+  <!-- Products -->
+  <section id="page-products" class="d-none">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="mb-0">Sản phẩm</h5>
+      <div class="d-flex gap-2">
+        <input class="form-control form-control-sm" style="width:200px" placeholder="Tìm SKU/Tên..." id="prod-search" />
+        <select class="form-select form-select-sm" style="width:140px" id="prod-filter-status">
+          <option value="">Tất cả</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <button class="btn btn-outline-success btn-sm" id="btn-export-products">Excel</button>
+        <button class="btn btn-primary btn-sm" id="btn-new-product">Thêm</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="table table-pro">
+        <thead>
+          <tr>
+            <th style="width:60px">#</th>
+            <th>SKU</th>
+            <th>Tên sản phẩm</th>
+            <th>Danh mục</th>
+            <th style="width:100px">Hình ảnh</th>
+            <th>Đơn vị</th>
+            <th>Ngưỡng tồn</th>
+            <th>Trạng thái</th>
+            <th style="width:160px">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-products"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Stock operations (unified form) -->
+  <section id="page-stock" class="d-none">
+    <div class="card shadow-sm form-card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+          <span class="badge bg-secondary me-2">Mã phiếu</span>
+          <span id="doc-code" class="fw-semibold">AUTO</span>
+        </div>
+        <div>
+          <div class="btn-group" role="group" aria-label="mode">
+            <button type="button" class="btn btn-outline-success btn-sm active" data-mode-switch="in"><i class="bi bi-box-arrow-in-down me-1"></i>Nhập</button>
+            <button type="button" class="btn btn-outline-warning btn-sm" data-mode-switch="out"><i class="bi bi-box-arrow-up me-1"></i>Xuất</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-mode-switch="adjust"><i class="bi bi-sliders me-1"></i>Điều chỉnh</button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Địa điểm (Kho)</label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                <select class="form-select" id="op-warehouse"></select>
+              </div>
+              <div class="form-text">Chọn kho thực hiện giao dịch</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Sản phẩm</label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+                <select class="form-select" id="op-product"></select>
+              </div>
+              <div class="form-text">SKU · Tên sản phẩm</div>
+            </div>
+            <div class="mb-3" id="op-supplier-wrap">
+              <label class="form-label">Nhà cung cấp</label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-truck"></i></span>
+                <select class="form-select" id="op-supplier"></select>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label" id="op-qty-label">Số lượng</label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-123"></i></span>
+                <input class="form-control" id="op-qty" type="number" placeholder="VD: 10" />
+              </div>
+              <div class="form-text d-none" id="op-stock-info">
+                <i class="bi bi-info-circle me-1" id="op-stock-icon"></i><span id="op-stock-text">Tồn kho hiện tại: </span><span class="fw-semibold" id="op-current-stock">0</span><span id="op-stock-warning"></span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Lý do</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                <select class="form-select" id="op-reason-select">
+                  <option value="">-- Chọn lý do --</option>
+                  <!-- Options will be populated dynamically based on mode (in/out/adjust) -->
+                </select>
+              </div>
+              <div class="input-group mt-2" id="op-reason-custom-wrap" style="display: none;">
+                <span class="input-group-text"><i class="bi bi-pencil"></i></span>
+                <input class="form-control" id="op-reason-custom" placeholder="Nhập lý do tùy chỉnh..." />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tài liệu tham chiếu</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+                <input class="form-control" id="op-ref" placeholder="PO-0001 / SO-0001 / ADJ-0001" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-2">
+          <button class="btn btn-primary" id="btn-op-save">
+            <span class="spinner-border spinner-border-sm me-2 d-none" id="btn-op-spinner"></span>
+            Cập nhật
+          </button>
+          <button class="btn btn-outline-secondary" id="btn-op-reset">Hủy bỏ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="card shadow-sm mt-3">
+      <div class="card-header">
+        <span class="fw-semibold" id="recent-title">Giao dịch gần đây</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-wrap">
+          <table class="table table-pro mb-0">
+            <thead>
+              <tr>
+                <th style="width:80px">Mã phiếu</th>
+                <th>Sản phẩm</th>
+                <th>Kho</th>
+                <th style="width:100px">Số lượng</th>
+                <th>Lý do</th>
+                <th style="width:140px">Thời gian</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-recent-tx"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reports -->
+  <section id="page-reports" class="d-none">
+
+    <!-- Filters toolbar -->
+    <div class="card shadow-sm sticky-top" style="top:10px; z-index: 9;">
+      <div class="card-body d-flex flex-wrap gap-2 align-items-end">
+        <div>
+          <label class="form-label mb-1">Kho</label>
+          <select id="rep-filter-warehouse" class="form-select form-select-sm" style="min-width: 180px;"></select>
+        </div>
+        <div>
+          <label class="form-label mb-1">Sản phẩm</label>
+          <select id="rep-filter-product" class="form-select form-select-sm" style="min-width: 240px;"></select>
+        </div>
+        <div>
+          <label class="form-label mb-1">Từ ngày</label>
+          <input id="rep-filter-from" type="date" class="form-control form-control-sm" />
+        </div>
+        <div>
+          <label class="form-label mb-1">Đến ngày</label>
+          <input id="rep-filter-to" type="date" class="form-control form-control-sm" />
+        </div>
+        <div class="ms-auto d-flex gap-2">
+          <button id="rep-apply" class="btn btn-primary btn-sm">Áp dụng</button>
+          <button id="rep-clear" class="btn btn-outline-secondary btn-sm">Xóa lọc</button>
+          <button id="rep-export" class="btn btn-outline-success btn-sm">Xuất Excel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row g-2 mt-1" id="rep-kpis">
+      <div class="col-6 col-md-3">
+        <div class="card kpi shadow-sm" style="cursor: pointer; border-left: 4px solid #0d6efd;" id="rep-kpi-card-sku" title="Click để xem chi tiết">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="kpi-icon bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 10px;">
+              <i class="bi bi-tags fs-4"></i>
+            </div>
+            <div>
+              <div class="kpi-title text-muted small">SKU</div>
+              <div class="kpi-value text-primary" id="rep-kpi-sku">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card kpi shadow-sm" style="cursor: pointer; border-left: 4px solid #198754;" id="rep-kpi-card-qty" title="Click để xem chi tiết tổng tồn">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="kpi-icon bg-success-subtle text-success d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 10px;">
+              <i class="bi bi-box-seam fs-4"></i>
+            </div>
+            <div>
+              <div class="kpi-title text-muted small">Tổng tồn</div>
+              <div class="kpi-value text-success" id="rep-kpi-qty">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card kpi shadow-sm" style="cursor: pointer; border-left: 4px solid #ffc107;" id="rep-kpi-card-low" title="Click để xem chi tiết cảnh báo">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="kpi-icon bg-warning-subtle text-warning d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 10px;">
+              <i class="bi bi-exclamation-triangle fs-4"></i>
+            </div>
+            <div>
+              <div class="kpi-title text-muted small">Cảnh báo</div>
+              <div class="kpi-value text-warning" id="rep-kpi-low">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card kpi shadow-sm" style="cursor: pointer; border-left: 4px solid #6610f2;" id="rep-kpi-card-tx" title="Click để xem chi tiết giao dịch">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="kpi-icon bg-purple-subtle text-purple d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 10px;">
+              <i class="bi bi-arrow-repeat fs-4"></i>
+            </div>
+            <div>
+              <div class="kpi-title text-muted small">Giao dịch</div>
+              <div class="kpi-value text-purple" id="rep-kpi-tx" style="font-size: 0.9rem;">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mt-3" id="rep-tabs" role="tablist">
+      <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-cur" type="button" role="tab">Tồn hiện tại</button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-low" type="button" role="tab">Cảnh báo tồn thấp</button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-time" type="button" role="tab">Nhập/Xuất theo thời gian</button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-moving" type="button" role="tab">Top biến động</button></li>
+    </ul>
+
+    <div class="tab-content pt-3">
+      <!-- Current stock -->
+      <div class="tab-pane fade show active" id="tab-cur" role="tabpanel">
+        <div class="table-wrap">
+          <table class="table table-pro">
+            <thead>
+              <tr>
+                <th>SKU</th><th>Tên</th><th>Kho</th><th>Tồn</th><th>ĐVT</th><th>Reorder</th><th>Cập nhật</th>
+              </tr>
+            </thead>
+            <tbody id="report-cur"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Low stock -->
+      <div class="tab-pane fade" id="tab-low" role="tabpanel">
+        <div class="table-wrap">
+          <table class="table table-pro">
+            <thead>
+              <tr>
+                <th>SKU</th><th>Tên</th><th>Kho</th><th>Tồn</th><th>Ngưỡng</th>
+              </tr>
+            </thead>
+            <tbody id="report-low"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Time series -->
+      <div class="tab-pane fade" id="tab-time" role="tabpanel">
+        <div class="d-flex justify-content-end mb-2">
+          <div class="btn-group btn-group-sm" role="group">
+            <button class="btn btn-outline-secondary active" id="rep-scale-month">Tháng</button>
+            <button class="btn btn-outline-secondary" id="rep-scale-week">Tuần</button>
+            <button class="btn btn-outline-secondary" id="rep-scale-day">Ngày</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <canvas id="rep-chart-time"></canvas>
+          </div>
+        </div>
+        <div class="card mt-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="fw-semibold">Giao dịch chi tiết</div>
+              <div class="text-muted small" id="rep-txns-hint"></div>
+            </div>
+            <div class="table-wrap">
+              <table class="table table-pro">
+                <thead>
+                  <tr>
+                    <th>Thời gian</th>
+                    <th>Loại</th>
+                    <th>SKU</th>
+                    <th>Tên SP</th>
+                    <th>Kho</th>
+                    <th class="cell-num">SL</th>
+                    <th>Ref</th>
+                    <th>Ghi chú</th>
+                  </tr>
+                </thead>
+                <tbody id="report-txns"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Moving -->
+      <div class="tab-pane fade" id="tab-moving" role="tabpanel">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card"><div class="card-body"><canvas id="rep-chart-moving"></canvas></div></div>
+          </div>
+          <div class="col-md-6">
+            <div class="table-wrap">
+              <table class="table table-pro">
+                <thead><tr><th>SKU</th><th>Tên</th><th>Tổng biến động</th></tr></thead>
+                <tbody id="report-top"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Users (manager only) -->
+  <section id="page-users" class="d-none">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="mb-0">Người dùng</h5>
+      <button class="btn btn-primary btn-sm" id="btn-new-user">Thêm</button>
+    </div>
+    <div class="table-wrap">
+      <table class="table table-pro">
+        <thead><tr><th>ID</th><th>Username</th><th>Họ tên</th><th>Role</th><th>Trạng thái</th><th></th></tr></thead>
+        <tbody id="tbl-users"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- Product Detail Modal -->
+<div class="modal fade" id="product-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="product-modal-title">Thông tin sản phẩm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-5">
+            <div class="product-image-wrap">
+              <img id="product-modal-img" alt="product" />
+            </div>
+            <div class="d-flex gap-2 mt-2">
+              <input class="form-control form-control-sm" type="file" accept="image/*" id="product-image-file" />
+              <button class="btn btn-sm btn-primary" id="btn-upload-image">Tải ảnh</button>
+            </div>
+          </div>
+          <div class="col-md-7">
+            <div class="mb-2"><span class="text-muted">SKU:</span> <span id="product-modal-sku" class="fw-semibold"></span></div>
+            <div class="mb-2"><span class="text-muted">Tên:</span> <span id="product-modal-name" class="fw-semibold"></span></div>
+            <div class="mb-2"><span class="text-muted">Danh mục:</span> <span id="product-modal-category"></span></div>
+            <div class="mb-2"><span class="text-muted">Đơn vị:</span> <span id="product-modal-unit"></span></div>
+            <div class="mb-2"><span class="text-muted">Ngưỡng cảnh báo:</span> <span id="product-modal-reorder"></span></div>
+            <div class="mb-2"><span class="text-muted">Kho chính:</span> <span id="product-modal-default-warehouse" class="fw-semibold"></span></div>
+            <div class="mb-2"><span class="text-muted">Sản phẩm cha:</span> <span id="product-modal-parent" class="fw-semibold"></span></div>
+            <div class="mb-2"><span class="text-muted">Trạng thái:</span> <span id="product-modal-status" class="badge bg-secondary"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+ </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="main.js?v=2.0.1"></script>
+</body>
+</html>
